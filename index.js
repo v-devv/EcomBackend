@@ -11,6 +11,7 @@ const cors = require("cors");
 require('dotenv').config();
 
 const secretKey = process.env.Secret_ecom;
+
 const baseUrl = process.env.NODE_ENV === "production" ? host : `${host}:${port}`;
 app.use(express.json());
 app.use(cors());
