@@ -1,3 +1,4 @@
+const host = process.env.HOST || "http://localhost";
 const port = process.env.PORT || 5000;
 
 const express = require("express");
@@ -9,8 +10,8 @@ const path = require("path");
 const cors = require("cors");
 require('dotenv').config();
 
-const sceretKey = process.env.Secret_ecom;
-
+const secretKey = process.env.Secret_ecom;
+const baseUrl = process.env.NODE_ENV === "production" ? host : `${host}:${port}`;
 app.use(express.json());
 app.use(cors());
 
@@ -44,12 +45,13 @@ const upload = multer({ storage: storage });
 app.use("/images", express.static("upload/images"));
 
 app.post("/upload", upload.single("product"), (req, res) => {
-  res.json({
-    success: 1,
-    message: "Image uploaded successfully",
-    image_url: `http://localhost:${port}/images/${req.file.filename}`,
+    res.json({
+      success: 1,
+      message: "Image uploaded successfully",
+      image_url: `${baseUrl}/images/${req.file.filename}`,
+    });
   });
-});
+  
 
 //Schema Creating for Products
 const Product = mongoose.model("Product", {
@@ -198,7 +200,7 @@ app.post("/register", async (req, res) => {
     },
   };
 
-  const token = jwt.sign(data, sceretKey);
+  const token = jwt.sign(data, secretKey);
   res.json({ success: true, token });
 });
 
@@ -213,7 +215,7 @@ app.post("/login", async (req, res) => {
           id: user.id,
         },
       };
-      const token = jwt.sign(data, sceretKey);
+      const token = jwt.sign(data, secretKey);
       res.json({ success: true, token });
     } else {
       console.log("Password is incorrect");
@@ -257,7 +259,7 @@ const fetchUser = async (req, res, next) => {
     console.log("Error on token fetch");
   } else {
     try {
-      const data = jwt.verify(token, sceretKey);
+      const data = jwt.verify(token, secretKey);
       req.user = data.user;
       console.log(data, "jwt data");
       next();
